@@ -3,7 +3,6 @@ package pop
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -27,7 +26,7 @@ func MigrationCreate(path, name, ext string, up, down []byte) error {
 	if err != nil {
 		return errors.Wrapf(err, "couldn't write up migration %s", upf)
 	}
-	fmt.Printf("> %s\n", upf)
+	Logger.WithField("file", upf).Info("Created 'up' migration")
 
 	downf := filepath.Join(path, (fmt.Sprintf("%s_%s.down.%s", s, name, ext)))
 	err = ioutil.WriteFile(downf, down, 0666)
@@ -35,18 +34,18 @@ func MigrationCreate(path, name, ext string, up, down []byte) error {
 		return errors.Wrapf(err, "couldn't write up migration %s", downf)
 	}
 
-	fmt.Printf("> %s\n", downf)
+	Logger.WithField("file", downf).Info("Created 'down' migration")
 	return nil
 }
 
 // MigrateUp is deprecated, and will be removed in a future version. Use FileMigrator#Up instead.
 func (c *Connection) MigrateUp(path string) error {
-	warningMsg := "Connection#MigrateUp is deprecated, and will be removed in a future version. Use FileMigrator#Up instead."
+	logctx := Logger
 	_, file, no, ok := runtime.Caller(1)
 	if ok {
-		warningMsg = fmt.Sprintf("%s Called from %s:%d", warningMsg, file, no)
+		logctx = logctx.WithField("file", file).WithField("line", no)
 	}
-	log.Println(warningMsg)
+	logctx.Warn("Connection#MigrateUp is deprecated, and will be removed in a future version. Use FileMigrator#Up instead.")
 
 	mig, err := NewFileMigrator(path, c)
 	if err != nil {
@@ -57,12 +56,12 @@ func (c *Connection) MigrateUp(path string) error {
 
 // MigrateDown is deprecated, and will be removed in a future version. Use FileMigrator#Down instead.
 func (c *Connection) MigrateDown(path string, step int) error {
-	warningMsg := "Connection#MigrateDown is deprecated, and will be removed in a future version. Use FileMigrator#Down instead."
+	logctx := Logger
 	_, file, no, ok := runtime.Caller(1)
 	if ok {
-		warningMsg = fmt.Sprintf("%s Called from %s:%d", warningMsg, file, no)
+		logctx = logctx.WithField("file", file).WithField("line", no)
 	}
-	log.Println(warningMsg)
+	logctx.Warn("Connection#MigrateDown is deprecated, and will be removed in a future version. Use FileMigrator#Down instead.")
 
 	mig, err := NewFileMigrator(path, c)
 	if err != nil {
@@ -73,12 +72,12 @@ func (c *Connection) MigrateDown(path string, step int) error {
 
 // MigrateStatus is deprecated, and will be removed in a future version. Use FileMigrator#Status instead.
 func (c *Connection) MigrateStatus(path string) error {
-	warningMsg := "Connection#MigrateStatus is deprecated, and will be removed in a future version. Use FileMigrator#Status instead."
+	logctx := Logger
 	_, file, no, ok := runtime.Caller(1)
 	if ok {
-		warningMsg = fmt.Sprintf("%s Called from %s:%d", warningMsg, file, no)
+		logctx = logctx.WithField("file", file).WithField("line", no)
 	}
-	log.Println(warningMsg)
+	logctx.Warn("Connection#MigrateStatus is deprecated, and will be removed in a future version. Use FileMigrator#Status instead.")
 
 	mig, err := NewFileMigrator(path, c)
 	if err != nil {
@@ -89,12 +88,12 @@ func (c *Connection) MigrateStatus(path string) error {
 
 // MigrateReset is deprecated, and will be removed in a future version. Use FileMigrator#Reset instead.
 func (c *Connection) MigrateReset(path string) error {
-	warningMsg := "Connection#MigrateReset is deprecated, and will be removed in a future version. Use FileMigrator#Reset instead."
+	logctx := Logger
 	_, file, no, ok := runtime.Caller(1)
 	if ok {
-		warningMsg = fmt.Sprintf("%s Called from %s:%d", warningMsg, file, no)
+		logctx = logctx.WithField("file", file).WithField("line", no)
 	}
-	log.Println(warningMsg)
+	logctx.Warn("Connection#MigrateReset is deprecated, and will be removed in a future version. Use FileMigrator#Reset instead.")
 
 	mig, err := NewFileMigrator(path, c)
 	if err != nil {

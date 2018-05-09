@@ -83,14 +83,14 @@ func (m *mysql) CreateDB() error {
 	}
 	defer db.Close()
 	query := fmt.Sprintf("CREATE DATABASE `%s` DEFAULT COLLATE `utf8_general_ci`", deets.Database)
-	Log(query)
+	Logger.WithField("query", query).Debug("Creating record")
 
 	_, err = db.Exec(query)
 	if err != nil {
 		return errors.Wrapf(err, "error creating MySQL database %s", deets.Database)
 	}
 
-	fmt.Printf("created database %s\n", deets.Database)
+	Logger.WithField("database", deets.Database).Info("Created database")
 	return nil
 }
 
@@ -103,14 +103,14 @@ func (m *mysql) DropDB() error {
 	}
 	defer db.Close()
 	query := fmt.Sprintf("DROP DATABASE `%s`", deets.Database)
-	Log(query)
+	Logger.WithField("query", query).Debug("Dropping database")
 
 	_, err = db.Exec(query)
 	if err != nil {
 		return errors.Wrapf(err, "error dropping MySQL database %s", deets.Database)
 	}
 
-	fmt.Printf("dropped database %s\n", deets.Database)
+	Logger.WithField("database", deets.Database).Info("Dropped database")
 	return nil
 }
 
@@ -133,7 +133,7 @@ func (m *mysql) DumpSchema(w io.Writer) error {
 	if deets.Port == "socket" {
 		cmd = exec.Command("mysqldump", "-d", "-S", deets.Host, "-u", deets.User, fmt.Sprintf("--password=%s", deets.Password), deets.Database)
 	}
-	Log(strings.Join(cmd.Args, " "))
+	Logger.WithField("args", cmd.Args).Debug("Dumping schema")
 	cmd.Stdout = w
 	cmd.Stderr = os.Stderr
 
@@ -142,7 +142,7 @@ func (m *mysql) DumpSchema(w io.Writer) error {
 		return err
 	}
 
-	fmt.Printf("dumped schema for %s\n", m.Details().Database)
+	Logger.WithField("database", deets.Database).Info("Dumped schema")
 	return nil
 }
 
@@ -160,7 +160,7 @@ func (m *mysql) LoadSchema(r io.Reader) error {
 		defer in.Close()
 		io.Copy(in, r)
 	}()
-	Log(strings.Join(cmd.Args, " "))
+	Logger.WithField("args", cmd.Args).Debug("Loading schema")
 	err = cmd.Start()
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func (m *mysql) LoadSchema(r io.Reader) error {
 		return err
 	}
 
-	fmt.Printf("loaded schema for %s\n", m.Details().Database)
+	Logger.WithField("database", deets.Database).Info("Loaded schema")
 	return nil
 }
 

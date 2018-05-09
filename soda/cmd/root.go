@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -17,7 +16,7 @@ var version bool
 var RootCmd = &cobra.Command{
 	Short: "A tasty treat for all your database needs",
 	PersistentPreRun: func(c *cobra.Command, args []string) {
-		fmt.Printf("%s\n\n", Version)
+		pop.Logger.WithField("version", Version).Info("Starting")
 		env = defaults.String(os.Getenv("GO_ENV"), env)
 		setConfigLocation()
 	},
@@ -30,8 +29,7 @@ var RootCmd = &cobra.Command{
 
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
+		pop.Logger.WithError(err).Error("Failed")
 	}
 }
 
@@ -58,8 +56,7 @@ func setConfigLocation() {
 func getConn() *pop.Connection {
 	conn := pop.Connections[env]
 	if conn == nil {
-		fmt.Printf("There is no connection named %s defined!\n", env)
-		os.Exit(1)
+		pop.Logger.WithField("environment", env).Fatal("There is no connection for this environment")
 	}
 	return conn
 }

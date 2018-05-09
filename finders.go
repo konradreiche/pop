@@ -287,7 +287,7 @@ func (q Query) CountByField(model interface{}, field string) (int, error) {
 		}
 
 		countQuery := fmt.Sprintf("select count(%s) as row_count from (%s) a", field, query)
-		Log(countQuery, args...)
+		Logger.WithField("query", query).Debug("Counting by field")
 		return q.Connection.Store.Get(res, countQuery, args...)
 	})
 	return res.Count, err

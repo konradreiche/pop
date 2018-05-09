@@ -1,7 +1,6 @@
 package pop
 
 import (
-	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -121,7 +120,7 @@ func (cd *ConnectionDetails) Finalize() error {
 
 // Parse is deprecated! Please use `ConnectionDetails.Finalize()` instead!
 func (cd *ConnectionDetails) Parse(port string) error {
-	fmt.Println("[POP] ConnectionDetails#Parse(port string) has been deprecated!")
+	Logger.Warn("ConnectionDetails#Parse(port string) has been deprecated!")
 	return cd.Finalize()
 }
 

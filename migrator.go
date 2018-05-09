@@ -68,7 +68,7 @@ func (m Migrator) Up() error {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			fmt.Printf("> %s\n", mi.Name)
+			Logger.WithField("migration", mi.Name).Info("Migrated up")
 		}
 		return nil
 	})
@@ -111,7 +111,7 @@ func (m Migrator) Down(step int) error {
 				return err
 			}
 
-			fmt.Printf("< %s\n", mi.Name)
+			Logger.WithField("migration", mi.Name).Info("Migrated down")
 		}
 		return nil
 	})
@@ -208,10 +208,6 @@ func (m Migrator) exec(fn func() error) error {
 }
 
 func printTimer(timerStart time.Time) {
-	diff := time.Now().Sub(timerStart).Seconds()
-	if diff > 60 {
-		fmt.Printf("\n%.4f minutes\n", diff/60)
-	} else {
-		fmt.Printf("\n%.4f seconds\n", diff)
-	}
+	diff := time.Now().Sub(timerStart)
+	Logger.WithField("duration", diff).Info("Done")
 }

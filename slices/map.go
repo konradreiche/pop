@@ -3,7 +3,6 @@ package slices
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -47,7 +46,6 @@ func (m Map) UnmarshalJSON(b []byte) error {
 }
 
 func (s Map) UnmarshalText(text []byte) error {
-	fmt.Println(string(text))
 	err := json.Unmarshal(text, &s)
 	if err != nil {
 		return errors.WithStack(err)

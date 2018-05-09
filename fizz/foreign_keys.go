@@ -3,6 +3,8 @@ package fizz
 import (
 	"fmt"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type ForeignKeyRef struct {
@@ -55,11 +57,11 @@ func (f fizzer) DropForeignKey() interface{} {
 func parseForeignKeyRef(refs interface{}) (fkr ForeignKeyRef) {
 	refMap, ok := refs.(map[string]interface{})
 	if !ok {
-		fmt.Printf(`invalid references format %s\nmust be "{"table": ["colum1", "column2"]}"`, refs)
+		log.Warn(`invalid references format %s\nmust be "{"table": ["column1", "column2"]}"`, refs)
 		return
 	}
 	if len(refMap) != 1 {
-		fmt.Printf("only one table is supported as Foreign key reference")
+		log.Warn("only one table is supported as Foreign key reference")
 		return
 	}
 	for table, columns := range refMap {

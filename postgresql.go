@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 
 	"github.com/jmoiron/sqlx"
@@ -44,7 +43,7 @@ func (p *postgresql) Create(s store, model *Model, cols columns.Columns) error {
 		}{}
 		w := cols.Writeable()
 		query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) returning id", model.TableName(), w.String(), w.SymbolizedString())
-		Log(query)
+		Logger.WithField("query", query).Debug("Creating record")
 		stmt, err := s.PrepareNamed(query)
 		if err != nil {
 			return errors.WithStack(err)
@@ -86,14 +85,14 @@ func (p *postgresql) CreateDB() error {
 	}
 	defer db.Close()
 	query := fmt.Sprintf("CREATE DATABASE \"%s\"", deets.Database)
-	Log(query)
+	Logger.WithField("query", query).Debug("Creating database")
 
 	_, err = db.Exec(query)
 	if err != nil {
 		return errors.Wrapf(err, "error creating PostgreSQL database %s", deets.Database)
 	}
 
-	fmt.Printf("created database %s\n", deets.Database)
+	Logger.WithField("database", deets.Database).Info("Created database")
 	return nil
 }
 
@@ -105,14 +104,14 @@ func (p *postgresql) DropDB() error {
 	}
 	defer db.Close()
 	query := fmt.Sprintf("DROP DATABASE \"%s\"", deets.Database)
-	Log(query)
+	Logger.WithField("query", query).Debug("Dropping database")
 
 	_, err = db.Exec(query)
 	if err != nil {
 		return errors.Wrapf(err, "error dropping PostgreSQL database %s", deets.Database)
 	}
 
-	fmt.Printf("dropped database %s\n", deets.Database)
+	Logger.WithField("database", deets.Database).Info("Dropped database")
 	return nil
 }
 
@@ -166,7 +165,8 @@ func (p *postgresql) Lock(fn func() error) error {
 
 func (p *postgresql) DumpSchema(w io.Writer) error {
 	cmd := exec.Command("pg_dump", "-s", fmt.Sprintf("--dbname=%s", p.URL()))
-	Log(strings.Join(cmd.Args, " "))
+	Logger.WithField("args", cmd.Args).Debug("Dumping schema")
+
 	cmd.Stdout = w
 	cmd.Stderr = os.Stderr
 
@@ -175,7 +175,7 @@ func (p *postgresql) DumpSchema(w io.Writer) error {
 		return err
 	}
 
-	fmt.Printf("dumped schema for %s\n", p.Details().Database)
+	Logger.WithField("database", p.Details().Database).Info("Dumped schema")
 	return nil
 }
 
@@ -189,7 +189,7 @@ func (p *postgresql) LoadSchema(r io.Reader) error {
 		defer in.Close()
 		io.Copy(in, r)
 	}()
-	Log(strings.Join(cmd.Args, " "))
+	Logger.WithField("args", cmd.Args).Debug("Loading schema")
 
 	bb := &bytes.Buffer{}
 	cmd.Stdout = bb
@@ -205,7 +205,7 @@ func (p *postgresql) LoadSchema(r io.Reader) error {
 		return errors.WithMessage(err, bb.String())
 	}
 
-	fmt.Printf("loaded schema for %s\n", p.Details().Database)
+	Logger.WithField("database", p.Details().Database).Info("Loaded schema")
 	return nil
 }
 

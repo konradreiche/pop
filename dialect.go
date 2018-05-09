@@ -42,7 +42,7 @@ func genericCreate(s store, model *Model, cols columns.Columns) error {
 		var id int64
 		w := cols.Writeable()
 		query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", model.TableName(), w.String(), w.SymbolizedString())
-		Log(query)
+		Logger.WithField("query", query).Debug("Creating record")
 		res, err := s.NamedExec(query, model.Value)
 		if err != nil {
 			return errors.WithStack(err)
@@ -66,7 +66,7 @@ func genericCreate(s store, model *Model, cols columns.Columns) error {
 		w := cols.Writeable()
 		w.Add("id")
 		query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", model.TableName(), w.String(), w.SymbolizedString())
-		Log(query)
+		Logger.WithField("query", query).Debug("Creating record")
 		stmt, err := s.PrepareNamed(query)
 		if err != nil {
 			return errors.WithStack(err)
@@ -82,7 +82,7 @@ func genericCreate(s store, model *Model, cols columns.Columns) error {
 
 func genericUpdate(s store, model *Model, cols columns.Columns) error {
 	stmt := fmt.Sprintf("UPDATE %s SET %s where %s", model.TableName(), cols.Writeable().UpdateString(), model.whereID())
-	Log(stmt)
+	Logger.WithField("query", stmt).Debug("Updating record")
 	_, err := s.NamedExec(stmt, model.Value)
 	if err != nil {
 		return errors.WithStack(err)
@@ -100,7 +100,7 @@ func genericDestroy(s store, model *Model) error {
 }
 
 func genericExec(s store, stmt string) error {
-	Log(stmt)
+	Logger.WithField("query", stmt).Debug("Executing query")
 	_, err := s.Exec(stmt)
 	if err != nil {
 		return errors.WithStack(err)
@@ -110,7 +110,7 @@ func genericExec(s store, stmt string) error {
 
 func genericSelectOne(s store, model *Model, query Query) error {
 	sql, args := query.ToSQL(model)
-	Log(sql, args...)
+	Logger.WithField("query", sql).WithField("args", args).Debug("Retrieving record")
 	err := s.Get(model.Value, sql, args...)
 	if err != nil {
 		return errors.WithStack(err)
@@ -120,7 +120,7 @@ func genericSelectOne(s store, model *Model, query Query) error {
 
 func genericSelectMany(s store, models *Model, query Query) error {
 	sql, args := query.ToSQL(models)
-	Log(sql, args...)
+	Logger.WithField("query", sql).WithField("args", args).Debug("Retrieving records")
 	err := s.Select(models.Value, sql, args...)
 	if err != nil {
 		return errors.WithStack(err)
